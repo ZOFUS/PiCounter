@@ -19,7 +19,7 @@ const (
 func main() {
 	fmt.Printf("Вычисление числа π с точностью до %d знаков...\n", precision)
 
-	// CPU Profiling Setup
+	// Профилирование CPU
 	cpuProfFile, err := os.Create("cpu.prof")
 	if err != nil {
 		fmt.Println("Error creating CPU profile file:", err)
@@ -41,13 +41,12 @@ func main() {
 		progressbar.OptionThrottle(100*time.Millisecond),
 	)
 
-	piValue, err := pi.CalculatePi(precision, func(iteration int) { // Вызов CalculatePi и проверка на ошибку
-		bar.Set(iteration)
+	piValue, err := pi.CalculatePi(precision, func(iteration int) {
 		fmt.Printf("\nВычислено итераций: %d\n", iteration)
 	}, maxN)
 	if err != nil {
-		fmt.Println("Error calculating Pi:", err) // Handle error in main
-		return                                    // Exit on error
+		fmt.Println("Error calculating Pi:", err) 
+		return                                    
 	}
 
 	fmt.Println("\nРезультат вычисления числа π:")
@@ -60,7 +59,7 @@ func main() {
 		return
 	}
 	defer memProfFile.Close()
-	runtime.GC() // Run garbage collection to get accurate memory profile
+	runtime.GC() 
 	if err := pprof.WriteHeapProfile(memProfFile); err != nil {
 		fmt.Println("Error writing memory profile:", err)
 		return
