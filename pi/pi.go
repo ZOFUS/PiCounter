@@ -15,13 +15,13 @@ const (
 
 // cachedFactorial кэширует вычисленные факториалы в кольцевом буфере
 var cachedFactorial []factorialCacheEntry
-var factorialCacheIndex int64 // Индекс для кольцевого буфера
+var factorialCacheIndex int64
 var factorialMutex sync.Mutex
 
 type factorialCacheEntry struct {
 	n      int64
 	value  *big.Int
-	cached bool // Флаг, что запись в кэше валидна
+	cached bool
 }
 
 func PrecomputeFactorials(maxN int64) {
@@ -44,7 +44,7 @@ func PrecomputeFactorials(maxN int64) {
 			cached: true,
 		}
 
-		factorialCacheIndex++ // Увеличиваем индекс
+		factorialCacheIndex++
 	}
 }
 
@@ -87,7 +87,7 @@ func Factorial(n int64) (*big.Int, error) {
 	return result, nil
 }
 
-// calculatePiPartial вычисляет часть ряда для заданного диапазона k, оптимизировано переиспользование объектов big.Float и big.Int
+// calculatePiPartial вычисляет часть ряда для заданного диапазона k
 func calculatePiPartial(start, end int64, precision uint, sum *big.Float) error {
 	const (
 		multiplier  = 640320
@@ -112,7 +112,7 @@ func calculatePiPartial(start, end int64, precision uint, sum *big.Float) error 
 		}
 		numerator.Set(numeratorInt)
 
-		// numerator.Mul(numerator, big.NewInt(13591409+545140134*k)) // Заменено на переиспользование объектов
+		//Переиспользование объектов
 		constantTerm.Mul(big.NewInt(k), const545140134) // Вычисляем (545140134*k) как big.Int
 		constantTerm.Add(constantTerm, const13591409)   // Прибавляем 13591409 к результату (как big.Int)
 		numerator.Mul(numerator, constantTerm)          // Умножаем numerator на constantTerm (оба big.Int)
@@ -133,7 +133,7 @@ func calculatePiPartial(start, end int64, precision uint, sum *big.Float) error 
 		fk := new(big.Int).Set(fkInt)
 
 		denominator.Mul(denominator, fk).Mul(denominator, fk).Mul(denominator, fk)
-		pow.Set(big.NewInt(multiplier3)) // Заменено на переиспользование константы
+		pow.Set(big.NewInt(multiplier3))
 		pow.Set(constMultiplier3)
 		pow.Exp(pow, big.NewInt(k), nil)
 		denominator.Mul(denominator, pow)
@@ -173,9 +173,9 @@ func CalculatePi(digits int, update func(iteration int), maxN int64) (*big.Float
 		wg.Add(1)
 		go func(workerID int) {
 			defer wg.Done()
-			term := new(big.Float).SetPrec(prec)     // term для каждой горутины
-			tmpFloat := new(big.Float).SetPrec(prec) // tmpFloat для каждой горутины
-			constantTerm := new(big.Int)             //  <---  Временная переменная для (13591409 + 545140134*task.k) как *big.Int* (для горутин) - выделяем один раз для горутины
+			term := new(big.Float).SetPrec(prec)
+			tmpFloat := new(big.Float).SetPrec(prec)
+			constantTerm := new(big.Int)
 
 			for task := range taskChan {
 				partialSum := new(big.Float).SetPrec(prec)
@@ -197,11 +197,10 @@ func CalculatePi(digits int, update func(iteration int), maxN int64) (*big.Float
 				}
 				num := new(big.Int).Set(numInt)
 
-				// num.Mul(num, big.NewInt(13591409+545140134*task.k)) // Заменено на переиспользование объектов и big.Int вычисления
-				constantTerm.Mul(big.NewInt(task.k), const545140134) // Вычисляем (545140134*k) как big.Int
-				constantTerm.Add(constantTerm, const13591409)        // Прибавляем 13591409 к результату (как big.Int)
-				num.Mul(num, constantTerm)                           // Умножаем numerator на constantTerm (оба big.Int)
-
+				// Переиспользование объектов и big.Int вычисления
+				constantTerm.Mul(big.NewInt(task.k), const545140134)
+				constantTerm.Add(constantTerm, const13591409)
+				num.Mul(num, constantTerm)
 				if task.k%2 != 0 {
 					num.Neg(num)
 				}
@@ -251,7 +250,7 @@ func CalculatePi(digits int, update func(iteration int), maxN int64) (*big.Float
 			start int64
 			end   int64
 			k     int64
-		}{start: start, end: end, k: k - 1} // Отправляем задачу в канал
+		}{start: start, end: end, k: k - 1}
 
 		term := new(big.Float).SetPrec(prec)
 
@@ -287,7 +286,7 @@ func CalculatePi(digits int, update func(iteration int), maxN int64) (*big.Float
 		tmpFloat := new(big.Float).SetPrec(prec).SetInt(den)
 		term.Quo(term, tmpFloat)
 
-		if k > 0 { // Исправленное условие выхода из цикла:
+		if k > 0 {
 			absTerm := new(big.Float).SetPrec(prec)
 			absTerm.Abs(term)
 			if absTerm.Cmp(termThreshold) < 0 {

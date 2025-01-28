@@ -38,13 +38,12 @@ func TestCalculatePiLoopCondition(t *testing.T) {
 			end = 1
 		}
 
-		// Declare missing variables HERE - for unit test loop scope
-		numerator := new(big.Int)                // <--- Declare numerator
-		denominator := new(big.Int)              // <--- Declare denominator
-		_ = denominator                          // <--- Фиктивное использование denominator, чтобы убрать предупреждение
-		term := new(big.Float).SetPrec(prec)     // <--- Declare term
-		pow := new(big.Int)                      // <--- Declare pow
-		tmpFloat := new(big.Float).SetPrec(prec) // <--- Declare tmpFloat
+		numerator := new(big.Int)
+		denominator := new(big.Int)
+		_ = denominator
+		term := new(big.Float).SetPrec(prec)
+		pow := new(big.Int)
+		tmpFloat := new(big.Float).SetPrec(prec)
 
 		numInt, err := pi.Factorial(6 * k)
 		if err != nil {
