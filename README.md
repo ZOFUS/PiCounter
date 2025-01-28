@@ -19,8 +19,8 @@
 Для работы проекта необходимы следующие библиотеки:
 
 *   `github.com/schollz/progressbar/v3`: Для отображения прогресса вычислений.
-*   
-Установите их, используя `go get`:
+  
+Установите пакет, используя `go get`:
 
 ```bash
 go get github.com/schollz/progressbar/v3
