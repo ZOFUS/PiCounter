@@ -9,60 +9,52 @@ import (
 	"time"
 
 	"example.com/GO_PRAC/pi"
-	"github.com/schollz/progressbar/v3"
 )
 
 const (
-	precision = 10000
+	digits = 1000000
 )
 
 func main() {
-	fmt.Printf("Вычисление числа π с точностью до %d знаков...\n", precision)
+	startTotal := time.Now()
+	fmt.Printf("Вычисление числа π с точностью до %d знаков после запятой...\n", digits)
 
-	// Профилированние CPU
-	cpuProfFile, err := os.Create("cpu.prof")
+	// Вычисление π
+	startCalc := time.Now()
+	piValue := pi.CalculatePi(digits)
+	elapsedCalc := time.Since(startCalc)
+	fmt.Printf("Вычисление завершено за %s\n", elapsedCalc)
+
+	// Преобразование в строку
+	startStr := time.Now()
+	resultStr := piValue.Text('f', digits)
+	elapsedStr := time.Since(startStr)
+	fmt.Printf("Преобразование в строку завершено за %s\n", elapsedStr)
+
+	// Запись в файл
+	startWrite := time.Now()
+	err := os.WriteFile("pi.txt", []byte(resultStr), 0644)
 	if err != nil {
-		fmt.Println("Error creating CPU profile file:", err)
-		return
+		fmt.Println("Ошибка записи в файл:", err)
 	}
-	defer cpuProfFile.Close()
-	if err := pprof.StartCPUProfile(cpuProfFile); err != nil {
-		fmt.Println("Error starting CPU profile:", err)
-		return
-	}
-	defer pprof.StopCPUProfile()
+	elapsedWrite := time.Since(startWrite)
+	fmt.Printf("Запись в файл завершено за %s\n", elapsedWrite)
 
-	maxN := int64(6 * precision)
-	pi.PrecomputeFactorials(maxN)
-
-	bar := progressbar.NewOptions(precision,
-		progressbar.OptionSetDescription("Прогресс"),
-		progressbar.OptionSetTheme(progressbar.Theme{Saucer: "#", SaucerPadding: "-", BarStart: "[", BarEnd: "]"}),
-		progressbar.OptionThrottle(100*time.Millisecond),
-	)
-
-	piValue, err := pi.CalculatePi(precision, func(iteration int) {
-		bar.Set(iteration)
-		fmt.Printf("\nВычислено итераций: %d\n", iteration)
-	}, maxN)
-	if err != nil {
-		fmt.Println("Error calculating Pi:", err)
-		return
-	}
-
-	fmt.Println("\nРезультат вычисления числа π:")
-	fmt.Println(piValue.Text('f', precision))
-
-	// Профилированние памяти
+	// Профилирование памяти
+	startMemProf := time.Now()
 	memProfFile, err := os.Create("mem.prof")
 	if err != nil {
-		fmt.Println("Error creating memory profile file:", err)
+		fmt.Println("Ошибка создания профиля памяти:", err)
 		return
 	}
 	defer memProfFile.Close()
 	runtime.GC()
 	if err := pprof.WriteHeapProfile(memProfFile); err != nil {
-		fmt.Println("Error writing memory profile:", err)
-		return
+		fmt.Println("Ошибка записи профиля памяти:", err)
 	}
+	elapsedMemProf := time.Since(startMemProf)
+	fmt.Printf("Профилирование памяти завершено за %s\n", elapsedMemProf)
+
+	totalElapsed := time.Since(startTotal)
+	fmt.Printf("Общее время работы: %s\n", totalElapsed)
 }
