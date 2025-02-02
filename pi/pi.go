@@ -1,15 +1,15 @@
-// pi/pi.go
 package pi
 
 import (
+	"math/big"
 	"sync"
 
 	"github.com/ncw/gmp"
 )
 
 var (
-	C1 = gmp.NewInt(640320)
-	C3 = new(gmp.Int).Exp(C1, gmp.NewInt(3), nil)
+	C  = gmp.NewInt(640320)
+	C3 = new(gmp.Int).Exp(C, gmp.NewInt(3), nil)
 )
 
 const thresholdPar = 64
@@ -72,4 +72,26 @@ func bs(a, b int64) (P, Q, T *gmp.Int) {
 		T = new(gmp.Int).Add(tmp1, tmp2)
 		return
 	}
+}
+
+// CalculatePi возвращает π как строку (оптимизированная версия)
+func CalculatePi(digits int) string {
+	prec := uint(digits * 4)
+	N := int64(digits/14 + 1)
+
+	_, Q, T := bsPar(0, N)
+
+	// Вычисление π через big.Float
+	numerator := new(big.Int).SetBytes(Q.Bytes())
+	numerator.Mul(numerator, new(big.Int).Exp(big.NewInt(640320), big.NewInt(3), nil))
+
+	denominator := new(big.Int).SetBytes(T.Bytes())
+	denominator.Mul(denominator, big.NewInt(12))
+
+	pi := new(big.Float).SetPrec(prec).Quo(
+		new(big.Float).SetInt(numerator),
+		new(big.Float).SetInt(denominator),
+	)
+
+	return pi.Text('f', digits)
 }

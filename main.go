@@ -10,7 +10,7 @@ import (
 	"example.com/GO_PRAC/pi"
 )
 
-const digits = 1000000
+const digits = 100000
 
 func main() {
 	startTotal := time.Now()
@@ -28,11 +28,11 @@ func main() {
 
 	// Вычисление π
 	startCalc := time.Now()
-	piStr := pi.CalculatePi(digits) // Результат уже в виде строки
+	piStr := pi.CalculatePi(digits)
 	elapsedCalc := time.Since(startCalc)
 	fmt.Printf("Вычисление завершено за %s\n", elapsedCalc)
 
-	// Преобразование в строку не требуется, так как оно выполнено в CalculatePi
+	// Преобразование в строку уже выполнено
 	startStr := time.Now()
 	elapsedStr := time.Since(startStr)
 	fmt.Printf("Преобразование в строку завершено за %s\n", elapsedStr)
