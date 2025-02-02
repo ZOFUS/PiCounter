@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -11,29 +10,36 @@ import (
 	"example.com/GO_PRAC/pi"
 )
 
-const (
-	digits = 1000000
-)
+const digits = 1000000
 
 func main() {
 	startTotal := time.Now()
 	fmt.Printf("Вычисление числа π с точностью до %d знаков после запятой...\n", digits)
 
+	// Профилирование CPU
+	cpuProfFile, err := os.Create("cpu.prof")
+	if err != nil {
+		fmt.Println("Ошибка создания CPU профиля:", err)
+		return
+	}
+	defer cpuProfFile.Close()
+	pprof.StartCPUProfile(cpuProfFile)
+	defer pprof.StopCPUProfile()
+
 	// Вычисление π
 	startCalc := time.Now()
-	piValue := pi.CalculatePi(digits)
+	piStr := pi.CalculatePi(digits) // Результат уже в виде строки
 	elapsedCalc := time.Since(startCalc)
 	fmt.Printf("Вычисление завершено за %s\n", elapsedCalc)
 
-	// Преобразование в строку
+	// Преобразование в строку не требуется, так как оно выполнено в CalculatePi
 	startStr := time.Now()
-	resultStr := piValue.Text('f', digits)
 	elapsedStr := time.Since(startStr)
 	fmt.Printf("Преобразование в строку завершено за %s\n", elapsedStr)
 
 	// Запись в файл
 	startWrite := time.Now()
-	err := os.WriteFile("pi.txt", []byte(resultStr), 0644)
+	err = os.WriteFile("pi.txt", []byte(piStr), 0644)
 	if err != nil {
 		fmt.Println("Ошибка записи в файл:", err)
 	}
